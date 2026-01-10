@@ -1,19 +1,32 @@
 # LLM Salon Frontend
 
-Static web UI for LLM Salon.
+React app for LLM Salon.
+
+## Setup
+
+```bash
+npm install
+```
 
 ## Run locally
 
-From this directory:
-
 ```bash
-python -m http.server 8000
+npm run dev
 ```
 
-Then open `http://127.0.0.1:8000/ui/`.
+## Build
 
-## API
+```bash
+npm run build
+```
 
-The UI expects backend API routes under `/api/...`. If you host the frontend separately,
-add a reverse proxy or update the fetch URLs in `ui/index.html`.
+## Config
 
+- Amplify config: `src/amplifyconfiguration.json`
+- API base: set `VITE_API_BASE` (defaults to the current prod URL)
+
+Example `.env`:
+
+```bash
+VITE_API_BASE=https://fni1phduu2.execute-api.us-west-2.amazonaws.com/prod
+```

@@ -1,0 +1,13 @@
+{
+  "Auth": {
+    "Cognito": {
+      "userPoolId": "us-west-2_1InHeJqx2",
+      "userPoolClientId": "48h1vrgne3pv9sl774kivl6ptk",
+      "userPoolRegion": "us-west-2",
+      "loginWith": {
+        "email": true
+      },
+      "authFlowType": "CUSTOM_AUTH"
+    }
+  }
+}
