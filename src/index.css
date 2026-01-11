@@ -402,6 +402,26 @@ button:disabled {
   font-weight: 600;
 }
 
+.credits-header > div {
+  font-size: 22px;
+}
+
+.back-link {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  padding: 0;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.back-link .chevron {
+  font-size: 18px;
+  line-height: 1;
+}
+
 .credits-amount {
   font-size: 36px;
   font-weight: 700;
@@ -508,6 +528,16 @@ button:disabled {
   border: 1px solid var(--border);
   border-radius: 12px;
   background: #fbf8f2;
+}
+
+.credits-row.compact {
+  padding: 8px 12px;
+}
+
+.credits-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .credits-meta {

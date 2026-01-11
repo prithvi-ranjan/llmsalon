@@ -6,7 +6,7 @@ import {
   fetchAuthSession,
   getCurrentUser,
   signIn,
-  signOut,
+  signOut as amplifySignOut,
   signUp,
 } from "aws-amplify/auth";
 import config from "./amplifyconfiguration.json";
@@ -67,7 +67,7 @@ export default function App() {
   const [purchases, setPurchases] = useState([]);
   const [usageHistory, setUsageHistory] = useState([]);
   const [selectedDebateId, setSelectedDebateId] = useState(null);
-  const [credits, setCredits] = useState(0);
+  const [creditsUsd, setCreditsUsd] = useState(0);
   const [requestCount, setRequestCount] = useState(0);
   const [turns, setTurns] = useState([]);
   const [summary, setSummary] = useState("");
@@ -163,7 +163,7 @@ export default function App() {
     if (resp.ok) {
       setKnown(!!data.known);
       setDebates(data.debates || []);
-      setCredits(data.user ? data.user.credits || 0 : 0);
+      setCreditsUsd(data.user ? data.user.credits_usd || 0 : 0);
       setRequestCount(data.user ? data.user.request_count || 0 : 0);
       setPurchases(data.purchases || []);
       setUsageHistory(data.usage || []);
@@ -367,7 +367,7 @@ export default function App() {
       await refreshUser();
       if (!localStorage.getItem("userId")) return;
     }
-    if (requestCount > 0 && credits <= 0) {
+    if (requestCount > 0 && creditsUsd <= 0) {
       navigate("/credits");
       return;
     }
@@ -464,7 +464,7 @@ export default function App() {
         } else if (message.type === "final") {
           setSummary(message.summary || "");
           if (typeof message.credits === "number") {
-            setCredits(message.credits);
+            setCreditsUsd(message.credits);
           }
           if (typeof message.request_count === "number") {
             setRequestCount(message.request_count);
@@ -532,7 +532,9 @@ export default function App() {
     });
     const data = await resp.json();
     if (!resp.ok || !data.url) {
-      setCreditsStatus(data.error || "Checkout failed.");
+      setCreditsStatus(
+        "Payment setup failed. Please try again, or contact support if it keeps failing."
+      );
       return;
     }
     window.location.href = data.url;
@@ -551,9 +553,9 @@ export default function App() {
     window.history.replaceState({}, "", next);
   }
 
-  async function signOut() {
+  async function handleSignOut() {
     try {
-      await signOut();
+      await amplifySignOut();
     } catch {
       // ignore
     }
@@ -566,6 +568,7 @@ export default function App() {
     setUserId("");
     localStorage.removeItem("authToken");
     localStorage.removeItem("userId");
+    localStorage.removeItem("email");
     setShowAuthModal(true);
   }
 
@@ -650,7 +653,7 @@ export default function App() {
                 <button type="button" onClick={() => { navigate("/credits"); setDropdownOpen(false); }}>
                   Credits
                 </button>
-                <button type="button" onClick={signOut}>
+                <button type="button" onClick={handleSignOut}>
                   Sign out
                 </button>
               </div>
@@ -720,18 +723,19 @@ export default function App() {
         <main className="panel">
           {showCreditsPage ? (
             <section className="credits-page">
+              <button type="button" className="back-link" onClick={() => navigate("/")}>
+                <span className="chevron">‹</span>
+                Back to chat
+              </button>
               <div className="credits-header">
                 <div>Credits</div>
-                <button type="button" className="secondary" onClick={() => navigate("/")}>
-                  Back to chat
-                </button>
               </div>
-              <div className="credits-amount">${credits.toFixed(2)}</div>
+              <div className="credits-amount">${creditsUsd.toFixed(2)}</div>
 
               <div className="credits-card">
                 <div className="credits-card-title">Add credits</div>
                 <div className="credits-note">Credits are dollars. Minimum purchase $5.</div>
-                <div className="credits-fee">A $0.80 service fee and taxes will be added to the credit amount.</div>
+                <div className="credits-fee">Taxes may be added to the credit amount.</div>
                 <label htmlFor="creditAmount">Amount (USD)</label>
                 <input
                   id="creditAmount"
@@ -754,12 +758,13 @@ export default function App() {
                   <div className="status">No purchases yet.</div>
                 ) : (
                   purchases.map((item, idx) => (
-                    <div key={`purchase-${idx}`} className="credits-row">
-                      <div>
-                        <div>{formatCurrency(item.amount_cents, item.currency)}</div>
-                        <div className="credits-meta">{formatTimestamp(item.created_at)}</div>
+                    <div key={`purchase-${idx}`} className="credits-row compact">
+                      <div className="credits-value">
+                        {formatCurrency(item.amount_cents, item.currency)}
                       </div>
-                      <div className="credits-meta">Fee {formatCurrency(item.fee_cents, item.currency)}</div>
+                      <div className="credits-value">
+                        {formatTimestamp(item.created_at)}
+                      </div>
                     </div>
                   ))
                 )}
@@ -767,11 +772,12 @@ export default function App() {
             </section>
           ) : showActivityPage ? (
             <section className="activity-page">
+              <button type="button" className="back-link" onClick={() => navigate("/")}>
+                <span className="chevron">‹</span>
+                Back to chat
+              </button>
               <div className="credits-header">
                 <div>Activity</div>
-                <button type="button" className="secondary" onClick={() => navigate("/")}>
-                  Back to chat
-                </button>
               </div>
               {(() => {
                 const usageByDebate = new Map();
@@ -790,7 +796,7 @@ export default function App() {
                     turns: debate.turn_count || 0,
                     updated_at: debate.updated_at,
                     tokens: usage?.total_tokens || null,
-                    cost: usage?.total_cost ?? null,
+                    cost: usage?.total_cost_usd ?? null,
                   };
                 });
 
@@ -880,7 +886,6 @@ export default function App() {
                 </div>
                 {!isStreaming ? (
                   <>
-                    <label htmlFor="topic">Your prompt</label>
                     <div
                       className="composer-input"
                       onClick={(event) => {
@@ -917,7 +922,7 @@ export default function App() {
                             runDebate();
                           }
                         }}
-                        placeholder="Ask a focused question to kick off the debate..."
+                        placeholder="Ask a focused question to kick off the discussion..."
                         maxLength={5000}
                         rows={1}
                       />
