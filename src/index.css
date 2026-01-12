@@ -334,11 +334,29 @@ button:disabled {
 }
 
 .modal {
-  width: min(620px, 94vw);
+  width: min(1100px, 94vw);
   background: #fff;
   border-radius: 20px;
   padding: 24px;
   box-shadow: var(--panel-shadow);
+}
+
+.modal-content {
+  display: flex;
+  gap: 28px;
+  align-items: stretch;
+}
+
+.modal-left {
+  flex: 0.9;
+  min-width: 0;
+}
+
+.modal-right {
+  flex: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal h3 {
@@ -348,8 +366,28 @@ button:disabled {
 
 .modal img {
   width: 100%;
+  max-width: 600px;
   border-radius: 12px;
-  margin: 12px 0 18px;
+  margin: 0;
+}
+
+.modal-left {
+  text-align: left;
+}
+
+.modal-left .modal-actions {
+  justify-content: flex-start;
+}
+
+@media (max-width: 780px) {
+  .modal-content {
+    flex-direction: column;
+  }
+
+  .modal img {
+    max-width: none;
+    margin-top: 12px;
+  }
 }
 
 .modal-actions {
@@ -375,6 +413,36 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.faq-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faq-item {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  box-shadow: var(--panel-shadow);
+}
+
+.faq-question {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.faq-answer {
+  color: #4a4a4a;
+  line-height: 1.5;
 }
 
 @keyframes fadeIn {

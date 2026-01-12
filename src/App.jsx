@@ -22,10 +22,10 @@ const STREAM_API_BASE =
   "https://vuqqnn45p46wqy6jv7pgctwsbi0tfgyi.lambda-url.us-west-2.on.aws/";
 
 const RECOMMENDATIONS = [
-  "What policy change would most reduce urban congestion without harming small businesses?",
-  "Design a low-cost experiment to test if AI teammates improve creativity in product teams.",
-  "What are the strongest arguments against building data centers in space?",
-  "Propose a governance framework for AI debate systems used in public policy.",
+  "Will India’s neutral stance in U.S.–China tech competition hold through 2030? What breaks it?",
+  "Is the theatrical movie release still the best launch strategy for major franchises in 2026?",
+  "What are the strongest arguments for and against building data centers in space?",
+  "What is Apple’s best strategy to defend iPhone margins if global smartphone demand stalls?",
 ];
 
 function generatePassword() {
@@ -110,6 +110,7 @@ export default function App() {
 
   const showCreditsPage = location.pathname === "/credits";
   const showActivityPage = location.pathname === "/activity";
+  const showFaqPage = location.pathname === "/faq";
 
   useLayoutEffect(() => {
     if (!isStreaming || showCreditsPage) {
@@ -178,19 +179,16 @@ export default function App() {
 
   async function getAuthHeader() {
     if (!signedIn) {
-      console.log("[auth] getAuthHeader: not signed in");
       return {};
     }
     try {
       const session = await fetchAuthSession();
       const idToken = session.tokens?.idToken?.toString();
       if (!idToken) throw new Error("no_token");
-      console.log("[auth] getAuthHeader: token acquired", idToken.slice(0, 16), "len", idToken.length);
       setToken(idToken);
       localStorage.setItem("authToken", idToken);
       return { Authorization: `Bearer ${idToken}` };
     } catch {
-      console.log("[auth] getAuthHeader: token missing");
       return {};
     }
   }
@@ -205,19 +203,12 @@ export default function App() {
     }
     if (!idToken && user?.signInUserSession?.idToken?.jwtToken) {
       idToken = user.signInUserSession.idToken.jwtToken;
-      console.log("[auth] finishSignIn: token from legacy session", idToken.slice(0, 16));
     }
     if (idToken) {
-      console.log("[auth] finishSignIn: token acquired", idToken.slice(0, 16));
       setToken(idToken);
       localStorage.setItem("authToken", idToken);
     } else {
-      console.warn("[auth] finishSignIn: token missing");
     }
-    console.log("[auth] finishSignIn: signed in", {
-      email: user?.signInDetails?.loginId || user?.username || email,
-      hasToken: !!idToken,
-    });
     setSignedIn(true);
     setShowAuthModal(false);
     setCodeRequired(false);
@@ -236,13 +227,11 @@ export default function App() {
 
     setAuthStatus("Creating your account...");
     try {
-      console.log("[auth] signUp: starting", trimmed);
       await signUp({
         username: trimmed,
         password: generatePassword(),
         attributes: { email: trimmed },
       });
-      console.log("[auth] signUp: success", trimmed);
     } catch (err) {
       console.log(err);
       if (err?.code !== "UsernameExistsException") {
@@ -253,19 +242,13 @@ export default function App() {
 
     setAuthStatus("Signing you in...");
     try {
-      console.log("[auth] signIn: starting", trimmed);
       const newUser = await signIn({
         username: trimmed,
         options: {
           authFlowType: 'CUSTOM_WITHOUT_SRP',
         },
       });
-      console.log("[auth] signIn: response", {
-        isSignedIn: newUser?.isSignedIn,
-        nextStep: newUser?.nextStep?.signInStep,
-      });
       if (newUser?.nextStep?.signInStep === "CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE") {
-        console.log("[auth] signIn: custom challenge requires code");
         setAuthStatus("Enter the code sent to your email.");
         setCodeRequired(true);
         setPendingUser(newUser);
@@ -276,7 +259,6 @@ export default function App() {
         await finishSignIn(confirmedUser);
         return;
       }
-      console.log("[auth] signIn: unexpected nextStep", newUser?.nextStep?.signInStep);
       setAuthStatus("Failed to sign in.");
       return;
     } catch (err) {
@@ -291,7 +273,6 @@ export default function App() {
       return;
     }
     try {
-      console.log("[auth] confirmSignIn: manual code submit");
       await confirmSignIn({
         challengeResponse: code.trim(),
       });
@@ -385,7 +366,6 @@ export default function App() {
     setTopic("");
 
     const headers = await getAuthHeader();
-    console.log("[stream] auth header present", Boolean(headers.Authorization));
     let resp;
     try {
       const controller = new AbortController();
@@ -411,7 +391,6 @@ export default function App() {
       return;
     }
 
-    console.log("[stream] response", resp.status, resp.statusText);
     if (!resp.ok || !resp.body) {
       setStatus("Full generation failed.");
       setTurns((prev) => [...prev, { speaker: "System", text: "Full generation failed.", error: true }]);
@@ -592,7 +571,6 @@ export default function App() {
         await refreshUser();
         await checkPurchaseStatus();
       } catch {
-        console.log("[auth] initAuth: no current user");
         setShowAuthModal(true);
       }
     }
@@ -652,6 +630,9 @@ export default function App() {
                 </button>
                 <button type="button" onClick={() => { navigate("/credits"); setDropdownOpen(false); }}>
                   Credits
+                </button>
+                <button type="button" onClick={() => { navigate("/faq"); setDropdownOpen(false); }}>
+                  FAQs
                 </button>
                 <button type="button" onClick={handleSignOut}>
                   Sign out
@@ -835,6 +816,40 @@ export default function App() {
                 );
               })()}
             </section>
+          ) : showFaqPage ? (
+            <section className="faq-page">
+              <button type="button" className="back-link" onClick={() => navigate("/")}>
+                <span className="chevron">‹</span>
+                Back to chat
+              </button>
+              <div className="credits-header">
+                <div>FAQs</div>
+              </div>
+              <div className="faq-list">
+                <div className="faq-item">
+                  <div className="faq-question">How does pricing work?</div>
+                  <div className="faq-answer">
+                    Credits are dollars. Each response deducts credits based on token usage for
+                    that generation, and you are billed as the models generate answers.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">How do I request a credit adjustment or refund?</div>
+                  <div className="faq-answer">
+                    Email tryllmsalon@gmail.com with your account email, the discussion link, and a
+                    brief description of what happened.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Why does LLM Salon exist?</div>
+                  <div className="faq-answer">
+                    LLM Salon exists to move beyond single-model answers by letting diverse models
+                    debate, critique, and synthesize so you get clearer tradeoffs and more original
+                    ideas.
+                  </div>
+                </div>
+              </div>
+            </section>
           ) : (
             <>
               <section className="chat" ref={chatRef}>
@@ -949,48 +964,62 @@ export default function App() {
         style={{ display: showAuthModal ? "flex" : "none" }}
       >
         <div className="modal">
-          <h3>Welcome to the LLM Salon</h3>
-          <p className="lead">
-            A structured space for multiple AI models to explore ideas, find disagreements,
-            and synthesize better answers together.
-          </p>
-          <img src="/landing-modal.png" alt="LLM Salon" />
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            placeholder="you@domain.com"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-          {codeRequired && (
-            <>
-              <label htmlFor="code" style={{ marginTop: "8px" }}>
-                Verification code
-              </label>
+          <div className="modal-content">
+            <div className="modal-left">
+              <h3>Welcome to the LLM Salon</h3>
+              <p className="lead">
+                Salons are meetings of intellectuals to discuss and debate.
+              </p>
+              <p className="lead">
+                The LLM Salon is a meeting of the most capable LLMs. You ask a question, they will work together to answer.
+              </p>
+              <p className="lead">
+                The models critique, refine, and synthesize their ideas together, providing more depth and reducing the sycophancy of any one model.
+              </p>
+              <p className="lead">
+                Your access to an executive team of LLMs, ready to discuss and debate each other to get your answer, is here.
+              </p>
+              <label htmlFor="email">Email</label>
               <input
-                id="code"
-                type="text"
-                placeholder="Enter code sent to your email"
-                value={code}
-                onChange={(event) => setCode(event.target.value)}
+                id="email"
+                type="email"
+                placeholder="you@domain.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
               />
-              <div className="status">
-                We sent a one-time code. Enter it to continue.
+              {codeRequired && (
+                <>
+                  <label htmlFor="code" style={{ marginTop: "8px" }}>
+                    Verification code
+                  </label>
+                  <input
+                    id="code"
+                    type="text"
+                    placeholder="Enter code sent to your email"
+                    value={code}
+                    onChange={(event) => setCode(event.target.value)}
+                  />
+                  <div className="status">
+                    We sent a one-time code. It may be in your spam folder. Enter it to continue.
+                  </div>
+                </>
+              )}
+              <div className="status">{authStatus}</div>
+              <div className="modal-actions">
+                {!codeRequired ? (
+                  <button type="button" onClick={checkEmail}>
+                    Continue
+                  </button>
+                ) : (
+                  <button type="button" onClick={verifyCode}>
+                    Verify
+                  </button>
+                )}
               </div>
-            </>
-          )}
-          <div className="status">{authStatus}</div>
-          <div className="modal-actions">
-            {!codeRequired ? (
-              <button type="button" onClick={checkEmail}>
-                Continue
-              </button>
-            ) : (
-              <button type="button" onClick={verifyCode}>
-                Verify
-              </button>
-            )}
+            </div>
+            <div className="modal-right">
+              <img src="/landing-modal.png" alt="LLM Salon" />
+            </div>
           </div>
         </div>
       </div>
