@@ -919,25 +919,33 @@ export default function App() {
               </div>
               <div className="faq-list">
                 <div className="faq-item">
+                  <div className="faq-question">Why does LLM Salon exist?</div>
+                  <div className="faq-answer">
+                    A discussion with diverse opinions is a great way to create new ideas. The paradigm of one person : one LLM  is highly limiting. Our goal is to use the best LLMs in a new way -- multi-agent deliberations -- to invent new ideas through debate, critique, and synthesis.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">How does it work?</div>
+                  <div className="faq-answer">
+                    When you submit a question, we first ask each model to provide an independent response. Then, we go in a circle, allowing each model to respond until a total of 12 turns have been used. You can continue the discussion for as long as you want, in batches of 12 turns.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">What models do you use?</div>
+                  <div className="faq-answer">
+                    GPT 5.2, Grok 4.1, Gemini 3 Flash, and Claude 4.5 Sonnet.
+                  </div>
+                </div>
+                <div className="faq-item">
                   <div className="faq-question">How does pricing work?</div>
                   <div className="faq-answer">
-                    Credits are dollars. Each response deducts credits based on token usage for
-                    that generation, and you are billed as the models generate answers.
+                    Like the underlying model providers, we operate by charging per million input and output tokens. The exact price fluctuates with the underlying model providers, but is roughly $1.8 per million input tokens and $10.6 per million output tokens. Each model response in your discussions consumes input and output tokens. We use the best models available, with reasoning enabled.
                   </div>
                 </div>
                 <div className="faq-item">
                   <div className="faq-question">How do I request a credit adjustment or refund?</div>
                   <div className="faq-answer">
-                    Email tryllmsalon@gmail.com with your account email.
-                  </div>
-                </div>
-                <div className="faq-item">
-                  <div className="faq-question">Why does LLM Salon exist?</div>
-                  <div className="faq-answer">
-                    A discussion with diverse opinions is a great way to create new ideas. The paradigm of one person talking to one LLM to get subjective answers is highly limiting. Our goal is to use the best LLMs in a new way -- together in an intellectual discussion -- to invent new ideas through debate, critique, and synthesis.
-                    Anyone who has spoken to an LLM knows that they can sound confident but be incorrect and shallow. By  move beyond single-model answers by letting diverse models
-                    debate, critique, and synthesize so you get clearer tradeoffs and more original
-                    ideas.
+                    Email tryllmsalon@gmail.com with your account email and request.
                   </div>
                 </div>
               </div>
