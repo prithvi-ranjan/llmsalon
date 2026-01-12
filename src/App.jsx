@@ -76,6 +76,7 @@ export default function App() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [indicatorTop, setIndicatorTop] = useState(null);
   const [authStatus, setAuthStatus] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
   const [code, setCode] = useState("");
   const [codeRequired, setCodeRequired] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(true);
@@ -84,6 +85,7 @@ export default function App() {
   const [creditAmount, setCreditAmount] = useState("");
   const [creditsStatus, setCreditsStatus] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const chatRef = React.useRef(null);
   const composerRef = React.useRef(null);
   const topicRef = React.useRef(null);
@@ -224,8 +226,49 @@ export default function App() {
     }
     setEmail(trimmed);
     localStorage.setItem("email", trimmed);
+    setAuthStatus("");
+    setAuthLoading(true);
 
-    setAuthStatus("Creating your account...");
+    const startSignIn = async () => {
+      try {
+        const newUser = await signIn({
+          username: trimmed,
+          options: {
+            authFlowType: "CUSTOM_WITHOUT_SRP",
+          },
+        });
+        if (newUser?.nextStep?.signInStep === "CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE") {
+          setCodeRequired(true);
+          setPendingUser(newUser);
+          setAuthLoading(false);
+          return true;
+        }
+        if (newUser?.isSignedIn) {
+          const confirmedUser = await getCurrentUser();
+          await finishSignIn(confirmedUser);
+          setAuthLoading(false);
+          return true;
+        }
+        setAuthStatus("Failed to sign in.");
+        setAuthLoading(false);
+        return true;
+      } catch (err) {
+        const errorCode = err?.name || err?.code;
+        if (errorCode === "UserNotFoundException" || errorCode === "UserNotFound") {
+          setAuthLoading(false);
+          return false;
+        }
+        setAuthStatus("Failed to sign in.");
+        setAuthLoading(false);
+        return true;
+      }
+    };
+
+    const signInHandled = await startSignIn();
+    if (signInHandled) {
+      return;
+    }
+
     try {
       await signUp({
         username: trimmed,
@@ -233,45 +276,24 @@ export default function App() {
         attributes: { email: trimmed },
       });
     } catch (err) {
-      console.log(err);
-      if (err?.code !== "UsernameExistsException") {
+      const errorCode = err?.name || err?.code;
+      if (errorCode !== "UsernameExistsException" && errorCode !== "UsernameExists") {
         setAuthStatus("Failed to create account.");
+        setAuthLoading(false);
         return;
       }
     }
 
-    setAuthStatus("Signing you in...");
-    try {
-      const newUser = await signIn({
-        username: trimmed,
-        options: {
-          authFlowType: 'CUSTOM_WITHOUT_SRP',
-        },
-      });
-      if (newUser?.nextStep?.signInStep === "CONFIRM_SIGN_IN_WITH_CUSTOM_CHALLENGE") {
-        setAuthStatus("Enter the code sent to your email.");
-        setCodeRequired(true);
-        setPendingUser(newUser);
-        return;
-      }
-      if (newUser?.isSignedIn) {
-        const confirmedUser = await getCurrentUser();
-        await finishSignIn(confirmedUser);
-        return;
-      }
-      setAuthStatus("Failed to sign in.");
-      return;
-    } catch (err) {
-      console.log(err);
-      setAuthStatus("Failed to sign in.");
-      return;
-    }
+    setAuthLoading(true);
+    await startSignIn();
   }
 
   async function verifyCode() {
     if (!code) {
       return;
     }
+    setAuthStatus("");
+    setAuthLoading(true);
     try {
       await confirmSignIn({
         challengeResponse: code.trim(),
@@ -280,6 +302,8 @@ export default function App() {
       await finishSignIn(user);
     } catch {
       setAuthStatus("Invalid code.");
+    } finally {
+      setAuthLoading(false);
     }
   }
 
@@ -602,6 +626,28 @@ export default function App() {
         <div className="brand">LLM Salon</div>
         <div className="topbar-actions">
           <button
+            type="button"
+            className="icon-button compact mobile-only"
+            aria-label="Toggle discussions sidebar"
+            onClick={() => setSidebarOpen((prev) => !prev)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#000000"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 6h18" />
+              <path d="M3 12h18" />
+              <path d="M3 18h18" />
+            </svg>
+          </button>
+          <button
             className="secondary"
             type="button"
             onClick={() => {
@@ -617,7 +663,7 @@ export default function App() {
             Get credits
           </button>
           {signedIn && (
-            <div className="dropdown" id="userMenu">
+            <div className="dropdown desktop-only" id="userMenu">
               <button type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
                 {email || "Account"}
               </button>
@@ -643,8 +689,54 @@ export default function App() {
         </div>
       </div>
 
+      <div
+        className={`mobile-sidebar-backdrop${sidebarOpen ? " show" : ""}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+
       <div className="shell">
-        <aside className="panel sidebar">
+        <aside className={`panel sidebar${sidebarOpen ? " open" : ""}`}>
+          <div className="sidebar-account mobile-only">
+            <div className="sidebar-account-title">{email || "Account"}</div>
+            <div className="sidebar-account-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  navigate("/activity");
+                  setSidebarOpen(false);
+                }}
+              >
+                Activity
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  navigate("/credits");
+                  setSidebarOpen(false);
+                }}
+              >
+                Credits
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  navigate("/faq");
+                  setSidebarOpen(false);
+                }}
+              >
+                FAQs
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleSignOut();
+                  setSidebarOpen(false);
+                }}
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
           <div className="sidebar-header">
             <h2>Discussions</h2>
             <button
@@ -657,6 +749,7 @@ export default function App() {
                 setSummary("");
                 setTopic("");
                 navigate("/");
+                setSidebarOpen(false);
               }}
             >
               <svg
@@ -689,7 +782,10 @@ export default function App() {
                   key={item.debate_id}
                   className={`conversation${item.debate_id === selectedDebateId ? " active" : ""
                     }`}
-                  onClick={() => selectConversation(item.debate_id)}
+                  onClick={() => {
+                    selectConversation(item.debate_id);
+                    setSidebarOpen(false);
+                  }}
                 >
                   <div className="conversation-title">{item.topic || "Untitled"}</div>
                   <div className="conversation-meta">
@@ -836,14 +932,14 @@ export default function App() {
                 <div className="faq-item">
                   <div className="faq-question">How do I request a credit adjustment or refund?</div>
                   <div className="faq-answer">
-                    Email tryllmsalon@gmail.com with your account email, the discussion link, and a
-                    brief description of what happened.
+                    Email tryllmsalon@gmail.com with your account email.
                   </div>
                 </div>
                 <div className="faq-item">
                   <div className="faq-question">Why does LLM Salon exist?</div>
                   <div className="faq-answer">
-                    LLM Salon exists to move beyond single-model answers by letting diverse models
+                    A discussion with diverse opinions is a great way to create new ideas. The paradigm of one person talking to one LLM to get subjective answers is highly limiting. Our goal is to use the best LLMs in a new way -- together in an intellectual discussion -- to invent new ideas through debate, critique, and synthesis.
+                    Anyone who has spoken to an LLM knows that they can sound confident but be incorrect and shallow. By  move beyond single-model answers by letting diverse models
                     debate, critique, and synthesize so you get clearer tradeoffs and more original
                     ideas.
                   </div>
@@ -977,7 +1073,7 @@ export default function App() {
                 The models critique, refine, and synthesize their ideas together, providing more depth and reducing the sycophancy of any one model.
               </p>
               <p className="lead">
-                Your access to an executive team of LLMs, ready to discuss and debate each other to get your answer, is here.
+                Your access to an executive team of LLMs is here.
               </p>
               <label htmlFor="email">Email</label>
               <input
@@ -986,6 +1082,14 @@ export default function App() {
                 placeholder="you@domain.com"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    if (!codeRequired) {
+                      checkEmail();
+                    }
+                  }
+                }}
               />
               {codeRequired && (
                 <>
@@ -998,13 +1102,26 @@ export default function App() {
                     placeholder="Enter code sent to your email"
                     value={code}
                     onChange={(event) => setCode(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        if (codeRequired) {
+                          verifyCode();
+                        }
+                      }
+                    }}
                   />
                   <div className="status">
                     We sent a one-time code. It may be in your spam folder. Enter it to continue.
                   </div>
                 </>
               )}
-              <div className="status">{authStatus}</div>
+              {authStatus && <div className="status">{authStatus}</div>}
+              {authLoading && (
+                <div className="auth-spinner">
+                  <div className="spinner" />
+                </div>
+              )}
               <div className="modal-actions">
                 {!codeRequired ? (
                   <button type="button" onClick={checkEmail}>
