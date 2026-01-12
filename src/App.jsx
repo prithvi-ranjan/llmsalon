@@ -28,6 +28,9 @@ const RECOMMENDATIONS = [
   "What is Apple’s best strategy to defend iPhone margins if global smartphone demand stalls?",
 ];
 
+const INSUFFICIENT_CREDITS_MESSAGE =
+  "Your credit balance isn't sufficient to cover a full discussion, please purchase additional credits.";
+
 function generatePassword() {
   const base = Math.random().toString(36).slice(2);
   const extra = Math.random().toString(36).slice(2);
@@ -154,9 +157,10 @@ export default function App() {
     return () => window.removeEventListener("click", closeMenu);
   }, []);
 
-  async function refreshUser() {
-    if (!email || !signedIn) return;
-    const headers = await getAuthHeader();
+  async function refreshUser(force = false) {
+    if (!email) return;
+    if (!signedIn && !force) return;
+    const headers = await getAuthHeader(force);
     const resp = await fetch(`${API_BASE}/api/user/init`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...headers },
@@ -179,8 +183,8 @@ export default function App() {
     return null;
   }
 
-  async function getAuthHeader() {
-    if (!signedIn) {
+  async function getAuthHeader(force = false) {
+    if (!signedIn && !force) {
       return {};
     }
     try {
@@ -214,7 +218,7 @@ export default function App() {
     setSignedIn(true);
     setShowAuthModal(false);
     setCodeRequired(false);
-    await refreshUser();
+    await refreshUser(true);
     await loadConversations();
   }
 
@@ -372,8 +376,8 @@ export default function App() {
       await refreshUser();
       if (!localStorage.getItem("userId")) return;
     }
-    if (requestCount > 0 && creditsUsd <= 0) {
-      navigate("/credits");
+    if (requestCount > 0 && creditsUsd < 0.1) {
+      setStatus(INSUFFICIENT_CREDITS_MESSAGE);
       return;
     }
 
@@ -500,14 +504,6 @@ export default function App() {
     await refreshUser();
   }
 
-  function stopStreaming() {
-    if (streamAbortRef.current) {
-      streamAbortRef.current.abort();
-      streamAbortRef.current = null;
-    }
-    setIsStreaming(false);
-  }
-
   async function startCheckout() {
     if (!signedIn) {
       setShowAuthModal(true);
@@ -592,7 +588,7 @@ export default function App() {
         }
         setSignedIn(true);
         setShowAuthModal(false);
-        await refreshUser();
+        await refreshUser(true);
         await checkPurchaseStatus();
       } catch {
         setShowAuthModal(true);
@@ -1039,16 +1035,29 @@ export default function App() {
                       />
                     </div>
                     <div className="actions">
-                      {status ? <span className="status">{status}</span> : null}
+                      {status ? (
+                        <span className="status">
+                          {status === INSUFFICIENT_CREDITS_MESSAGE ? (
+                            <>
+                              Your credit balance isn't sufficient to cover a full discussion,
+                              please{" "}
+                              <button
+                                type="button"
+                                className="inline-link"
+                                onClick={() => navigate("/credits")}
+                              >
+                                purchase additional credits
+                              </button>
+                              .
+                            </>
+                          ) : (
+                            status
+                          )}
+                        </span>
+                      ) : null}
                     </div>
                   </>
-                ) : (
-                  <div className="actions">
-                    <button type="button" className="secondary" onClick={stopStreaming}>
-                      Stop
-                    </button>
-                  </div>
-                )}
+                ) : null}
               </section>
             </>
           )}

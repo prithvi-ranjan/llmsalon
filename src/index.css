@@ -273,6 +273,15 @@ button:disabled {
   font-size: 13px;
 }
 
+.inline-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .chat {
   display: flex;
   flex-direction: column;
