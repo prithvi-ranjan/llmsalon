@@ -110,10 +110,12 @@ body {
   .shell {
     padding: 64px 10px 12px;
     gap: 12px;
+    height: calc(100dvh - 64px);
   }
 
   .panel {
     flex: 1;
+    height: 100%;
   }
 
   .shell {
@@ -202,7 +204,7 @@ body {
     margin-bottom: 8px;
     max-height: none;
     overflow: visible;
-    padding-bottom: 12px;
+    padding-bottom: 24px;
   }
 
   .recommendation {
