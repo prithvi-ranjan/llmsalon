@@ -803,44 +803,46 @@ export default function App() {
               <div className="credits-header">
                 <div>Credits</div>
               </div>
-              <div className="credits-amount">${creditsUsd.toFixed(2)}</div>
+              <div className="credits-body">
+                <div className="credits-amount">${creditsUsd.toFixed(2)}</div>
 
-              <div className="credits-card">
-                <div className="credits-card-title">Add credits</div>
-                <div className="credits-note">Credits are dollars. Minimum purchase $5.</div>
-                <div className="credits-fee">Taxes may be added to the credit amount.</div>
-                <label htmlFor="creditAmount">Amount (USD)</label>
-                <input
-                  id="creditAmount"
-                  type="text"
-                  placeholder="Minimum $5"
-                  value={creditAmount}
-                  onChange={(event) => setCreditAmount(event.target.value)}
-                />
-                <div className="status">{creditsStatus}</div>
-                <div className="credits-actions">
-                  <button type="button" onClick={startCheckout}>
-                    Add credits
-                  </button>
+                <div className="credits-card">
+                  <div className="credits-card-title">Add credits</div>
+                  <div className="credits-note">Credits are dollars. Minimum purchase $5.</div>
+                  <div className="credits-fee">Taxes may be added to the credit amount.</div>
+                  <label htmlFor="creditAmount">Amount (USD)</label>
+                  <input
+                    id="creditAmount"
+                    type="text"
+                    placeholder="Minimum $5"
+                    value={creditAmount}
+                    onChange={(event) => setCreditAmount(event.target.value)}
+                  />
+                  <div className="status">{creditsStatus}</div>
+                  <div className="credits-actions">
+                    <button type="button" onClick={startCheckout}>
+                      Add credits
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="credits-history">
-                <div className="credits-card-title">Recent purchases</div>
-                {purchases.length === 0 ? (
-                  <div className="status">No purchases yet.</div>
-                ) : (
-                  purchases.map((item, idx) => (
-                    <div key={`purchase-${idx}`} className="credits-row compact">
-                      <div className="credits-value">
-                        {formatCurrency(item.amount_cents, item.currency)}
+                <div className="credits-history">
+                  <div className="credits-card-title">Recent purchases</div>
+                  {purchases.length === 0 ? (
+                    <div className="status">No purchases yet.</div>
+                  ) : (
+                    purchases.map((item, idx) => (
+                      <div key={`purchase-${idx}`} className="credits-row compact">
+                        <div className="credits-value">
+                          {formatCurrency(item.amount_cents, item.currency)}
+                        </div>
+                        <div className="credits-value">
+                          {formatTimestamp(item.created_at)}
+                        </div>
                       </div>
-                      <div className="credits-value">
-                        {formatTimestamp(item.created_at)}
-                      </div>
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
+                </div>
               </div>
             </section>
           ) : showActivityPage ? (
@@ -852,61 +854,63 @@ export default function App() {
               <div className="credits-header">
                 <div>Activity</div>
               </div>
-              {(() => {
-                const usageByDebate = new Map();
-                for (const item of usageHistory) {
-                  if (!item.debate_id) continue;
-                  if (!usageByDebate.has(item.debate_id)) {
-                    usageByDebate.set(item.debate_id, item);
+              <div className="activity-body">
+                {(() => {
+                  const usageByDebate = new Map();
+                  for (const item of usageHistory) {
+                    if (!item.debate_id) continue;
+                    if (!usageByDebate.has(item.debate_id)) {
+                      usageByDebate.set(item.debate_id, item);
+                    }
                   }
-                }
 
-                const rows = debates.map((debate) => {
-                  const usage = usageByDebate.get(debate.debate_id);
-                  return {
-                    debate_id: debate.debate_id,
-                    topic: debate.topic || "Untitled",
-                    turns: debate.turn_count || 0,
-                    updated_at: debate.updated_at,
-                    tokens: usage?.total_tokens || null,
-                    cost: usage?.total_cost_usd ?? null,
-                  };
-                });
+                  const rows = debates.map((debate) => {
+                    const usage = usageByDebate.get(debate.debate_id);
+                    return {
+                      debate_id: debate.debate_id,
+                      topic: debate.topic || "Untitled",
+                      turns: debate.turn_count || 0,
+                      updated_at: debate.updated_at,
+                      tokens: usage?.total_tokens || null,
+                      cost: usage?.total_cost_usd ?? null,
+                    };
+                  });
 
-                return rows.length === 0 ? (
-                  <div className="status">No activity yet.</div>
-                ) : (
-                  <div className="activity-table">
-                    <div className="activity-row header">
-                      <div>Thread</div>
-                      <div>Updated</div>
-                      <div>Turns</div>
-                      <div>Tokens</div>
-                      <div>Cost</div>
+                  return rows.length === 0 ? (
+                    <div className="status">No activity yet.</div>
+                  ) : (
+                    <div className="activity-table">
+                      <div className="activity-row header">
+                        <div>Thread</div>
+                        <div>Updated</div>
+                        <div>Turns</div>
+                        <div>Tokens</div>
+                        <div>Cost</div>
+                      </div>
+                      {rows.map((row) => (
+                        <Link
+                          key={`activity-${row.debate_id}`}
+                          to={`/discussion/${row.debate_id}`}
+                          className="activity-row row-link"
+                          onClick={() => {
+                            setSelectedDebateId(row.debate_id);
+                            setTurns([]);
+                            setSummary("");
+                          }}
+                        >
+                          <div className="activity-title">{row.topic}</div>
+                          <div className="activity-meta">{formatTimestamp(row.updated_at)}</div>
+                          <div className="activity-meta">{row.turns}</div>
+                          <div className="activity-meta">{row.tokens ?? "—"}</div>
+                          <div className="activity-meta">
+                            {row.cost ? `$${row.cost.toFixed(4)}` : "—"}
+                          </div>
+                        </Link>
+                      ))}
                     </div>
-                    {rows.map((row) => (
-                      <Link
-                        key={`activity-${row.debate_id}`}
-                        to={`/discussion/${row.debate_id}`}
-                        className="activity-row row-link"
-                        onClick={() => {
-                          setSelectedDebateId(row.debate_id);
-                          setTurns([]);
-                          setSummary("");
-                        }}
-                      >
-                        <div className="activity-title">{row.topic}</div>
-                        <div className="activity-meta">{formatTimestamp(row.updated_at)}</div>
-                        <div className="activity-meta">{row.turns}</div>
-                        <div className="activity-meta">{row.tokens ?? "—"}</div>
-                        <div className="activity-meta">
-                          {row.cost ? `$${row.cost.toFixed(4)}` : "—"}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                );
-              })()}
+                  );
+                })()}
+              </div>
             </section>
           ) : showFaqPage ? (
             <section className="faq-page">

@@ -578,6 +578,7 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 0;
 }
 
 .faq-page {
@@ -592,7 +593,7 @@ button:disabled {
   flex-direction: column;
   gap: 16px;
   overflow-y: auto;
-  padding-right: 6px;
+  padding: 6px 14px;
 }
 
 .faq-item {
@@ -629,6 +630,15 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 0;
+}
+
+.credits-body,
+.activity-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 .credits-header {
