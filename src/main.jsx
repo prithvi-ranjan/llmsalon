@@ -12,6 +12,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/activity" element={<App />} />
         <Route path="/credits" element={<App />} />
         <Route path="/faq" element={<App />} />
+        <Route path="/privacy" element={<App />} />
+        <Route path="/terms" element={<App />} />
         <Route path="/discussion/:id" element={<App />} />
       </Routes>
     </BrowserRouter>

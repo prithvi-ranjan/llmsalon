@@ -119,6 +119,8 @@ export default function App() {
   const showCreditsPage = location.pathname === "/credits";
   const showActivityPage = location.pathname === "/activity";
   const showFaqPage = location.pathname === "/faq";
+  const showPrivacyPage = location.pathname === "/privacy";
+  const showTermsPage = location.pathname === "/terms";
 
   useLayoutEffect(() => {
     if (!isStreaming || showCreditsPage) {
@@ -1083,6 +1085,243 @@ export default function App() {
                   <div className="faq-question">How do I request a credit adjustment or refund?</div>
                   <div className="faq-answer">
                     Email tryllmsalon@gmail.com with your account email and request.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Where can I read the Privacy Policy?</div>
+                  <div className="faq-answer">
+                    View our{" "}
+                    <button
+                      type="button"
+                      className="inline-link"
+                      onClick={() => navigate("/privacy")}
+                    >
+                      Privacy Policy
+                    </button>
+                    .
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Where can I read the Terms of Use?</div>
+                  <div className="faq-answer">
+                    View our{" "}
+                    <button
+                      type="button"
+                      className="inline-link"
+                      onClick={() => navigate("/terms")}
+                    >
+                      Terms of Use
+                    </button>
+                    .
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : showPrivacyPage ? (
+            <section className="faq-page">
+              <button type="button" className="back-link" onClick={() => navigate("/")}>
+                <span className="chevron">‹</span>
+                Back to chat
+              </button>
+              <div className="credits-header">
+                <div>Privacy Policy</div>
+              </div>
+              <div className="faq-list">
+                <div className="faq-item">
+                  <div className="faq-question">Effective date</div>
+                  <div className="faq-answer">January 13, 2026</div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Who we are</div>
+                  <div className="faq-answer">
+                    LLM Salon is operated by Userverse Inc. (Delaware).
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Information we collect</div>
+                  <div className="faq-answer">
+                    We collect account information (email), usage information (prompts, responses,
+                    token counts, timestamps), product analytics, and technical information (IP
+                    address, device/browser data, logs). We do not store payment method details;
+                    payments are processed by Stripe.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">How we use information</div>
+                  <div className="faq-answer">
+                    We use information to provide and operate LLM Salon, process payments, improve
+                    model quality and product features, maintain security, and comply with legal
+                    obligations.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Sharing</div>
+                  <div className="faq-answer">
+                    We share data with service providers that help operate the product, including
+                    Stripe (payments), AWS (cloud infrastructure), OpenRouter (LLM routing), and
+                    the underlying LLM providers. We may also share data as required by law or to
+                    protect rights and safety. We do not sell personal data.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Retention</div>
+                  <div className="faq-answer">
+                    We retain account and usage data for as long as necessary to provide the
+                    service, comply with legal obligations, resolve disputes, and enforce
+                    agreements. You may request deletion by contacting us.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Your choices</div>
+                  <div className="faq-answer">
+                    You may request access, correction, or deletion of your account information by
+                    emailing tryllmsalon@gmail.com. You can also stop using the service at any
+                    time.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Security</div>
+                  <div className="faq-answer">
+                    We use reasonable administrative, technical, and physical safeguards to protect
+                    information. No method of transmission or storage is 100% secure.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Children</div>
+                  <div className="faq-answer">
+                    LLM Salon is not intended for minors. You must be at least 18 years old to use
+                    the service.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Changes</div>
+                  <div className="faq-answer">
+                    We may update this Privacy Policy. If we make material changes, we will post an
+                    updated version here with a new effective date.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Contact</div>
+                  <div className="faq-answer">
+                    Email tryllmsalon@gmail.com with privacy questions or requests.
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : showTermsPage ? (
+            <section className="faq-page">
+              <button type="button" className="back-link" onClick={() => navigate("/")}>
+                <span className="chevron">‹</span>
+                Back to chat
+              </button>
+              <div className="credits-header">
+                <div>Terms of Use</div>
+              </div>
+              <div className="faq-list">
+                <div className="faq-item">
+                  <div className="faq-question">Effective date</div>
+                  <div className="faq-answer">January 13, 2026</div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Agreement</div>
+                  <div className="faq-answer">
+                    These Terms of Use are a legal agreement between you and Userverse Inc.
+                    ("LLM Salon," "we," "our"). By accessing or using LLM Salon, you agree to these
+                    terms.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Eligibility</div>
+                  <div className="faq-answer">
+                    You must be at least 18 years old to use LLM Salon. You may not use the service
+                    if you are barred from receiving services under applicable law.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Account</div>
+                  <div className="faq-answer">
+                    You are responsible for your account and all activity under it. Keep your
+                    credentials secure and notify us of unauthorized use.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Acceptable use</div>
+                  <div className="faq-answer">
+                    You agree not to misuse the service, including attempting to disrupt, reverse
+                    engineer, or access it unlawfully, or using it for illegal or harmful purposes.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Content and outputs</div>
+                  <div className="faq-answer">
+                    LLM Salon generates outputs that may be inaccurate or incomplete. You are
+                    responsible for verifying outputs before relying on them. Outputs are generated
+                    through OpenRouter and underlying LLM providers.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">User content</div>
+                  <div className="faq-answer">
+                    You retain ownership of your prompts. You grant us a non-exclusive license to
+                    host, process, and use your prompts and generated outputs to operate and improve
+                    the service, including processing through OpenRouter and the underlying LLM
+                    providers.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Billing and credits</div>
+                  <div className="faq-answer">
+                    Usage is billed based on token consumption. You must maintain sufficient
+                    credits to start a discussion. Payment processing is handled by Stripe.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Refunds</div>
+                  <div className="faq-answer">
+                    Refunds or credit adjustments may be granted at our discretion. Email
+                    tryllmsalon@gmail.com with your request.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Disclaimer</div>
+                  <div className="faq-answer">
+                    The service is provided "as is" without warranties of any kind. We disclaim all
+                    warranties to the maximum extent permitted by law.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Limitation of liability</div>
+                  <div className="faq-answer">
+                    To the maximum extent permitted by law, we are not liable for any indirect,
+                    incidental, special, or consequential damages, or any loss of profits or data
+                    arising from your use of the service.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Termination</div>
+                  <div className="faq-answer">
+                    We may suspend or terminate access to the service at any time for violations of
+                    these terms or to protect the service.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Governing law</div>
+                  <div className="faq-answer">
+                    These terms are governed by the laws of the State of Delaware, without regard
+                    to conflict of laws principles.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Changes</div>
+                  <div className="faq-answer">
+                    We may update these terms. Continued use of the service after updates
+                    constitutes acceptance of the new terms.
+                  </div>
+                </div>
+                <div className="faq-item">
+                  <div className="faq-question">Contact</div>
+                  <div className="faq-answer">
+                    Email tryllmsalon@gmail.com for questions about these terms.
                   </div>
                 </div>
               </div>
