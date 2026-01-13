@@ -112,11 +112,12 @@ body {
   .shell {
     padding: 64px 10px 12px;
     gap: 12px;
+    height: 100dvh;
     min-height: 100dvh;
   }
 
   .panel {
-    min-height: calc(100dvh - 76px);
+    min-height: 0;
     height: 100%;
   }
 
