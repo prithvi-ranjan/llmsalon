@@ -112,6 +112,10 @@ body {
     gap: 12px;
   }
 
+  .panel {
+    flex: 1;
+  }
+
   .shell {
     grid-template-columns: 1fr;
   }
@@ -198,6 +202,7 @@ body {
     margin-bottom: 8px;
     max-height: none;
     overflow: visible;
+    padding-bottom: 12px;
   }
 
   .recommendation {
