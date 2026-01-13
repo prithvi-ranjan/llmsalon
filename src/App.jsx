@@ -939,7 +939,7 @@ export default function App() {
                 <div className="faq-item">
                   <div className="faq-question">How does pricing work?</div>
                   <div className="faq-answer">
-                    Like the underlying model providers, we operate by charging per million input and output tokens. The exact price fluctuates with the underlying model providers, but is roughly $1.8 per million input tokens and $10.6 per million output tokens. Each model response in your discussions consumes input and output tokens. We use the best models available, with reasoning enabled.
+                    Like the underlying model providers, we operate by charging per million input and output tokens. The exact price fluctuates with the underlying model providers, but is roughly $1.80 per million input tokens and $10.60 per million output tokens. Each model response in your discussions consumes input and output tokens. We use the best models available, with reasoning enabled.
                   </div>
                 </div>
                 <div className="faq-item">
@@ -1081,16 +1081,16 @@ export default function App() {
             <div className="modal-left">
               <h3>Welcome to the LLM Salon</h3>
               <p className="lead">
-                Salons are meetings of intellectuals to discuss and debate.
+                What's better than one LLM? Multiple LLMs, working together.
               </p>
               <p className="lead">
-                The LLM Salon is a meeting of the most capable LLMs. You ask a question, they will work together to answer.
+                Salons are meetings of intellectuals, and LLM Salon brings together the most capable LLMs to answer your questions better than any single LLM can.
               </p>
               <p className="lead">
-                The models critique, refine, and synthesize their ideas together, providing more depth and reducing the sycophancy of any one model.
+                LLM Salon is your new executive team at your fingertips. The models critique, refine, and synthesize their ideas together, providing greater depth and reducing the sycophancy of any one model.
               </p>
               <p className="lead">
-                Your access to an executive team of LLMs is here.
+                Try it out now, for free.
               </p>
               <label htmlFor="email">Email</label>
               <input

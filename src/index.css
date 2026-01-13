@@ -584,12 +584,15 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  min-height: 0;
 }
 
 .faq-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 .faq-item {
