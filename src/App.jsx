@@ -699,6 +699,21 @@ export default function App() {
               <path d="M3 18h18" />
             </svg>
           </button>
+          <button
+            className="secondary mobile-hide"
+            type="button"
+            onClick={() => {
+              if (!signedIn) {
+                setShowAuthModal(true);
+                return;
+              }
+              setCreditsStatus("");
+              navigate("/credits");
+              setDropdownOpen(false);
+            }}
+          >
+            Get credits
+          </button>
           {signedIn && (
             <div className="dropdown desktop-only" id="userMenu">
               <button type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
@@ -741,21 +756,6 @@ export default function App() {
               </div>
             </div>
           )}
-          <button
-            className="secondary mobile-hide"
-            type="button"
-            onClick={() => {
-              if (!signedIn) {
-                setShowAuthModal(true);
-                return;
-              }
-              setCreditsStatus("");
-              navigate("/credits");
-              setDropdownOpen(false);
-            }}
-          >
-            Get credits
-          </button>
         </div>
       </div>
 
@@ -929,9 +929,15 @@ export default function App() {
                   const usageByDebate = new Map();
                   for (const item of usageHistory) {
                     if (!item.debate_id) continue;
-                    if (!usageByDebate.has(item.debate_id)) {
-                      usageByDebate.set(item.debate_id, item);
-                    }
+                    const prev = usageByDebate.get(item.debate_id) || {
+                      total_tokens: 0,
+                      total_cost_usd: 0,
+                    };
+                    usageByDebate.set(item.debate_id, {
+                      total_tokens: prev.total_tokens + Number(item.total_tokens || 0),
+                      total_cost_usd:
+                        prev.total_cost_usd + Number(item.total_cost_usd || 0),
+                    });
                   }
 
                   const rows = debates.map((debate) => {
@@ -1026,7 +1032,10 @@ export default function App() {
             </section>
           ) : (
             <>
-              <section className="chat" ref={chatRef}>
+              <section
+                className={`chat${turns.length === 0 && !summary && !isStreaming ? " empty" : ""}`}
+                ref={chatRef}
+              >
                 {isStreaming && (
                   <div className="progress-indicator" style={{ top: indicatorTop ?? "50%" }}>
                     <div className="spinner" />
