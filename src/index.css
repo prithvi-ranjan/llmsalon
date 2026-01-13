@@ -61,6 +61,14 @@ body {
   gap: 10px;
 }
 
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: flex;
+}
+
 .brand {
   font-weight: 700;
   letter-spacing: 0.4px;
