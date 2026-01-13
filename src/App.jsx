@@ -157,6 +157,51 @@ export default function App() {
     return () => window.removeEventListener("click", closeMenu);
   }, []);
 
+  useEffect(() => {
+    let startX = null;
+    let startY = null;
+    let triggered = false;
+
+    const onTouchStart = (event) => {
+      const touch = event.touches?.[0];
+      if (!touch) return;
+      startX = touch.clientX;
+      startY = touch.clientY;
+      triggered = false;
+    };
+
+    const onTouchMove = (event) => {
+      if (startX === null || startY === null || triggered) return;
+      const touch = event.touches?.[0];
+      if (!touch) return;
+      const deltaX = touch.clientX - startX;
+      const deltaY = touch.clientY - startY;
+      if (startX <= 24 && deltaX > 60 && Math.abs(deltaY) < 40) {
+        setSidebarOpen(true);
+        triggered = true;
+      }
+      if (deltaX < -60 && Math.abs(deltaY) < 40) {
+        setSidebarOpen(false);
+        triggered = true;
+      }
+    };
+
+    const onTouchEnd = () => {
+      startX = null;
+      startY = null;
+      triggered = false;
+    };
+
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
+
   async function refreshUser(force = false) {
     if (!email) return;
     if (!signedIn && !force) return;
@@ -619,7 +664,18 @@ export default function App() {
   return (
     <>
       <div className="topbar">
-        <div className="brand">LLM Salon</div>
+        <div className="topbar-left">
+          <div className="brand">LLM Salon</div>
+          {signedIn && (
+            <button
+              type="button"
+              className="account-button mobile-only"
+              onClick={() => setSidebarOpen((prev) => !prev)}
+            >
+              {email || "Account"}
+            </button>
+          )}
+        </div>
         <div className="topbar-actions">
           <button
             type="button"
@@ -643,8 +699,50 @@ export default function App() {
               <path d="M3 18h18" />
             </svg>
           </button>
+          {signedIn && (
+            <div className="dropdown desktop-only" id="userMenu">
+              <button type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
+                {email || "Account"}
+              </button>
+              <div
+                className="dropdown-menu"
+                style={{ display: dropdownOpen ? "block" : "none" }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/activity");
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Activity
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/credits");
+                    setDropdownOpen(false);
+                  }}
+                >
+                  Credits
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate("/faq");
+                    setDropdownOpen(false);
+                  }}
+                >
+                  FAQs
+                </button>
+                <button type="button" onClick={handleSignOut}>
+                  Sign out
+                </button>
+              </div>
+            </div>
+          )}
           <button
-            className="secondary"
+            className="secondary mobile-hide"
             type="button"
             onClick={() => {
               if (!signedIn) {
@@ -658,30 +756,6 @@ export default function App() {
           >
             Get credits
           </button>
-          {signedIn && (
-            <div className="dropdown desktop-only" id="userMenu">
-              <button type="button" onClick={() => setDropdownOpen(!dropdownOpen)}>
-                {email || "Account"}
-              </button>
-              <div
-                className="dropdown-menu"
-                style={{ display: dropdownOpen ? "block" : "none" }}
-              >
-                <button type="button" onClick={() => { navigate("/activity"); setDropdownOpen(false); }}>
-                  Activity
-                </button>
-                <button type="button" onClick={() => { navigate("/credits"); setDropdownOpen(false); }}>
-                  Credits
-                </button>
-                <button type="button" onClick={() => { navigate("/faq"); setDropdownOpen(false); }}>
-                  FAQs
-                </button>
-                <button type="button" onClick={handleSignOut}>
-                  Sign out
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
@@ -776,23 +850,19 @@ export default function App() {
               debates.map((item) => (
                 <div
                   key={item.debate_id}
-                  className={`conversation${item.debate_id === selectedDebateId ? " active" : ""
-                    }`}
+                  className={`conversation${item.debate_id === selectedDebateId ? " active" : ""}`}
                   onClick={() => {
                     selectConversation(item.debate_id);
                     setSidebarOpen(false);
                   }}
                 >
                   <div className="conversation-title">{item.topic || "Untitled"}</div>
-                  <div className="conversation-meta">
-                    {item.turn_count || 0} turns
-                  </div>
+                  <div className="conversation-meta">{item.turn_count || 0} turns</div>
                 </div>
               ))
             )}
           </div>
         </aside>
-
         <main className="panel">
           {showCreditsPage ? (
             <section className="credits-page">
