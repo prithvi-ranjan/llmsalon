@@ -97,6 +97,16 @@ body {
     justify-content: flex-end;
   }
 
+  .topbar-left {
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  .brand {
+    flex: 1;
+    text-align: center;
+  }
+
   .desktop-only {
     display: none;
   }
@@ -140,7 +150,11 @@ body {
     transition: transform 0.2s ease;
     z-index: 5;
     border-radius: 0;
-    padding-top: 76px;
+    padding: 64px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
   }
 
   .sidebar.open {
@@ -148,11 +162,14 @@ body {
   }
 
   .sidebar-account {
-    margin: -56px 0 14px;
+    margin: 0;
     padding: 12px;
     border-radius: 12px;
     border: 1px solid var(--border);
     background: #fbf8f2;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .sidebar-account-title {
@@ -163,7 +180,8 @@ body {
 
   .sidebar-account-actions {
     display: grid;
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .sidebar-account-actions button {
@@ -172,6 +190,9 @@ body {
     background: transparent;
     color: var(--ink);
     border: 1px solid var(--border);
+    padding: 10px 12px;
+    font-size: 14px;
+    text-align: left;
   }
 
   .panel {
@@ -509,18 +530,6 @@ button:disabled {
   border-radius: 10px;
   font-weight: 600;
   color: var(--ink);
-}
-
-.mobile-hide {
-  display: inline-flex;
-}
-
-.mobile-only {
-  display: none;
-}
-
-.desktop-only {
-  display: flex;
 }
 
 .mobile-sidebar-backdrop {

@@ -69,6 +69,7 @@ export default function App() {
   const [debates, setDebates] = useState([]);
   const [purchases, setPurchases] = useState([]);
   const [usageHistory, setUsageHistory] = useState([]);
+  const [usageTotals, setUsageTotals] = useState([]);
   const [selectedDebateId, setSelectedDebateId] = useState(null);
   const [creditsUsd, setCreditsUsd] = useState(0);
   const [requestCount, setRequestCount] = useState(0);
@@ -94,6 +95,8 @@ export default function App() {
   const topicRef = React.useRef(null);
   const { id: discussionId } = useParams();
   const streamAbortRef = React.useRef(null);
+  const autoScrollRef = React.useRef(true);
+  const manualScrollRef = React.useRef(false);
 
   const recommendationsHidden = useMemo(
     () => topic.trim().length > 0 || turns.length > 0 || !!selectedDebateId,
@@ -141,6 +144,21 @@ export default function App() {
 
   useEffect(() => {
     if (!chatRef.current) return;
+    const node = chatRef.current;
+    const onScroll = () => {
+      const atBottom =
+        node.scrollHeight - node.scrollTop - node.clientHeight <= 2;
+      manualScrollRef.current = !atBottom;
+      autoScrollRef.current = !manualScrollRef.current;
+    };
+    node.addEventListener("scroll", onScroll);
+    onScroll();
+    return () => node.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!chatRef.current) return;
+    if (!autoScrollRef.current) return;
     const node = chatRef.current;
     requestAnimationFrame(() => {
       node.scrollTop = node.scrollHeight;
@@ -219,6 +237,7 @@ export default function App() {
       setRequestCount(data.user ? data.user.request_count || 0 : 0);
       setPurchases(data.purchases || []);
       setUsageHistory(data.usage || []);
+      setUsageTotals(data.usage_totals || []);
       if (data.user?.user_id) {
         setUserId(data.user.user_id);
         localStorage.setItem("userId", data.user.user_id);
@@ -396,7 +415,10 @@ export default function App() {
     const promptTurn = data.topic
       ? [{ speaker: "You", text: data.topic, role: "user" }]
       : [];
-    setTurns([...promptTurn, ...loadedTurns]);
+    const summaryTurn = data.summary
+      ? [{ speaker: "Moderator", text: data.summary, role: "summary" }]
+      : [];
+    setTurns([...promptTurn, ...loadedTurns, ...summaryTurn]);
     setSummary(data.summary || "");
   }
 
@@ -515,6 +537,12 @@ export default function App() {
           });
         } else if (message.type === "final") {
           setSummary(message.summary || "");
+          if (message.summary) {
+            setTurns((prev) => [
+              ...prev,
+              { speaker: "Moderator", text: message.summary, role: "summary" },
+            ]);
+          }
           if (typeof message.credits === "number") {
             setCreditsUsd(message.credits);
           }
@@ -665,18 +693,6 @@ export default function App() {
     <>
       <div className="topbar">
         <div className="topbar-left">
-          <div className="brand">LLM Salon</div>
-          {signedIn && (
-            <button
-              type="button"
-              className="account-button mobile-only"
-              onClick={() => setSidebarOpen((prev) => !prev)}
-            >
-              {email || "Account"}
-            </button>
-          )}
-        </div>
-        <div className="topbar-actions">
           <button
             type="button"
             className="icon-button compact mobile-only"
@@ -697,6 +713,39 @@ export default function App() {
               <path d="M3 6h18" />
               <path d="M3 12h18" />
               <path d="M3 18h18" />
+            </svg>
+          </button>
+          <div className="brand">LLM Salon</div>
+        </div>
+        <div className="topbar-actions">
+          <button
+            type="button"
+            className="icon-button compact mobile-only"
+            aria-label="New discussion"
+            onClick={() => {
+              setSelectedDebateId(null);
+              setTurns([]);
+              setSummary("");
+              setTopic("");
+              navigate("/");
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#000000"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-edit"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+              <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" />
+              <path d="M16 5l3 3" />
             </svg>
           </button>
           <button
@@ -927,17 +976,25 @@ export default function App() {
               <div className="activity-body">
                 {(() => {
                   const usageByDebate = new Map();
-                  for (const item of usageHistory) {
+                  const usageSource = usageTotals.length > 0 ? usageTotals : usageHistory;
+                  for (const item of usageSource) {
                     if (!item.debate_id) continue;
                     const prev = usageByDebate.get(item.debate_id) || {
                       total_tokens: 0,
                       total_cost_usd: 0,
                     };
-                    usageByDebate.set(item.debate_id, {
-                      total_tokens: prev.total_tokens + Number(item.total_tokens || 0),
-                      total_cost_usd:
-                        prev.total_cost_usd + Number(item.total_cost_usd || 0),
-                    });
+                    if (usageSource === usageTotals) {
+                      usageByDebate.set(item.debate_id, {
+                        total_tokens: Number(item.total_tokens || 0),
+                        billed_cost_usd: Number(item.billed_cost_usd || 0),
+                      });
+                    } else {
+                      usageByDebate.set(item.debate_id, {
+                        total_tokens: prev.total_tokens + Number(item.total_tokens || 0),
+                        total_cost_usd:
+                          prev.total_cost_usd + Number(item.total_cost_usd || 0),
+                      });
+                    }
                   }
 
                   const rows = debates.map((debate) => {
@@ -948,7 +1005,7 @@ export default function App() {
                       turns: debate.turn_count || 0,
                       updated_at: debate.updated_at,
                       tokens: usage?.total_tokens || null,
-                      cost: usage?.total_cost_usd ?? null,
+                      cost: usage?.billed_cost_usd ?? usage?.total_cost_usd ?? null,
                     };
                   });
 
@@ -1033,7 +1090,7 @@ export default function App() {
           ) : (
             <>
               <section
-                className={`chat${turns.length === 0 && !summary && !isStreaming ? " empty" : ""}`}
+                className={`chat${turns.length === 0 && !isStreaming ? " empty" : ""}`}
                 ref={chatRef}
               >
                 {isStreaming && (
@@ -1048,11 +1105,15 @@ export default function App() {
                     let nonUserTurn = 0;
                     return turns.map((turn, idx) => {
                       const label =
-                        turn.role === "user" ? "Prompt" : `Turn ${++nonUserTurn}`;
+                        turn.role === "user"
+                          ? "Prompt"
+                          : turn.role === "summary"
+                            ? "Moderator Summary"
+                            : `Turn ${++nonUserTurn}`;
                       return (
                         <div
                           key={`${turn.speaker}-${idx}`}
-                          className={`turn${turn.error ? " error" : ""}${turn.role === "user" ? " user" : ""}`}
+                          className={`turn${turn.error ? " error" : ""}${turn.role === "user" ? " user" : ""}${turn.role === "summary" ? " summary" : ""}`}
                         >
                           <h3>{`${label} | ${turn.speaker}`}</h3>
                           <div>{turn.text}</div>
@@ -1062,12 +1123,6 @@ export default function App() {
                   })()
                 )
                 }
-                {summary ? (
-                  <div className="turn summary">
-                    <h3>Moderator Summary</h3>
-                    <div>{summary}</div>
-                  </div>
-                ) : null}
               </section>
 
               <section className="composer" ref={composerRef}>
