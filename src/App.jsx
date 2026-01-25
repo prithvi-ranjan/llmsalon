@@ -29,7 +29,7 @@ const RECOMMENDATIONS = [
 ];
 
 const INSUFFICIENT_CREDITS_MESSAGE =
-  "Your credit balance isn't sufficient to cover a full discussion, please purchase additional credits.";
+  "You're out of credits. You can top up with as little as $5, and each discussion typically costs about $0.10.";
 
 function generatePassword() {
   const base = Math.random().toString(36).slice(2);
